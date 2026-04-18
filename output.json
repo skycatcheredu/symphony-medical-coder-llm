@@ -1,0 +1,81 @@
+{
+  "patientSummary": "Chief complaint: chest discomfort and shortness of breath. History: 58-year-old female with known coronary artery disease and hyperlipidemia. Assessment: unstable angina suspected; chronic ischemic heart disease on record. Procedure: electr",
+  "diagnosisCodes": [
+    {
+      "code": "I25.10",
+      "description": "Atherosclerotic heart disease of native coronary artery without angina pectoris",
+      "codingSystem": "ICD-10-CM",
+      "category": "diagnosis",
+      "confidence": 0.35,
+      "rationale": "Fallback selection from top ontology index match.",
+      "evidenceSpans": [
+        {
+          "text": "chest discomfort and shortness of breath",
+          "startChar": 17,
+          "endChar": 57,
+          "reason": "Heuristic fallback extraction from note line."
+        }
+      ]
+    }
+  ],
+  "procedureCodes": [
+    {
+      "code": "93000",
+      "description": "Electrocardiogram routine ECG with at least 12 leads with interpretation and report",
+      "codingSystem": "CPT",
+      "category": "procedure",
+      "confidence": 0.35,
+      "rationale": "Fallback selection from top ontology index match.",
+      "evidenceSpans": [
+        {
+          "text": "electrocardiogram performed during encounter",
+          "startChar": 234,
+          "endChar": 278,
+          "reason": "Heuristic fallback extraction from note line."
+        }
+      ]
+    }
+  ],
+  "stageTrace": [
+    {
+      "stage": "evidence_extraction",
+      "summary": "Extracted 4 codable candidates.",
+      "metadata": {
+        "candidateCount": 4
+      },
+      "startedAt": "2026-04-18T05:32:50.002Z",
+      "finishedAt": "2026-04-18T05:32:50.287Z"
+    },
+    {
+      "stage": "index_navigation",
+      "summary": "Generated candidate code options for 4 findings.",
+      "metadata": {
+        "findingsWithOptions": 4
+      },
+      "startedAt": "2026-04-18T05:32:50.287Z",
+      "finishedAt": "2026-04-18T05:32:50.287Z"
+    },
+    {
+      "stage": "tabular_validation",
+      "summary": "Validated 4 candidate selections.",
+      "metadata": {
+        "selectedCount": 4
+      },
+      "startedAt": "2026-04-18T05:32:50.287Z",
+      "finishedAt": "2026-04-18T05:32:50.527Z"
+    },
+    {
+      "stage": "code_reconciliation",
+      "summary": "Reconciled to 2 final codes.",
+      "metadata": {
+        "diagnosisCount": 1,
+        "procedureCount": 1
+      },
+      "startedAt": "2026-04-18T05:32:50.527Z",
+      "finishedAt": "2026-04-18T05:32:50.527Z"
+    }
+  ],
+  "generatedAt": "2026-04-18T05:32:50.527Z",
+  "provider": "gemini",
+  "model": "gemini-3.1-flash"
+}

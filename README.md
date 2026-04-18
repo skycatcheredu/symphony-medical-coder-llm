@@ -1,0 +1,50 @@
+# medical-coder-llm (Python)
+
+A Python CLI medical coder with the same stage workflow as the TypeScript reference in `with-bun/`:
+
+1. Evidence extraction
+2. Index navigation
+3. Tabular validation
+4. Code reconciliation
+
+Supports OpenAI and Gemini. Configure defaults in `src/medical_coder_llm/config/models.py`.
+
+## Install
+
+```bash
+uv sync
+# or: pip install -e .
+```
+
+## API keys
+
+Set one of:
+
+- `OPENAI_API_KEY` (provider `openai`)
+- `GEMINI_API_KEY` (provider `gemini`)
+
+`python-dotenv` loads `.env` from the current working directory.
+
+## Input and ontology
+
+- Default input: `input.txt`
+- Default ontology: `data/ontology/codes.csv`
+
+CSV columns: `code`, `description`, `codingSystem`, `category`, `searchTerms`
+
+## Run
+
+```bash
+uv run medical-coder-llm
+python -m medical_coder_llm
+```
+
+```bash
+uv run medical-coder-llm --input data/input.sample.txt -o output.json
+uv run medical-coder-llm --provider gemini --model gemini-2.5-flash
+uv run medical-coder-llm --ontology data/ontology/codes.csv
+```
+
+## Output
+
+Structured JSON: `patientSummary`, `diagnosisCodes`, `procedureCodes`, `stageTrace`, `provider`, `model`, `generatedAt`.

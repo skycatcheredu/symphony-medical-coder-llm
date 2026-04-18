@@ -1,0 +1,5 @@
+Patient: 64-year-old male with type 2 diabetes mellitus with neuropathy and essential hypertension.
+Visit type: outpatient follow-up.
+Assessment: diabetic peripheral neuropathy remains symptomatic; blood pressure elevated today.
+Plan: continue metformin, adjust antihypertensive medication, routine follow-up.
+Procedure performed: office/outpatient evaluation and management visit for an established patient, moderate complexity.

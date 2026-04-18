@@ -1,0 +1,2 @@
+[console_scripts]
+medical-coder-llm = medical_coder_llm.cli:main
