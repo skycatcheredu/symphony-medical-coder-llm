@@ -25,11 +25,11 @@ def _print_help() -> None:
             "  -h, --help               Show this help message",
             "",
             "Environment variables (configure LLM in `.env`; see `.env.example`):",
-            "  MODEL_PROVIDER           gemini | openai | lm_studio",
+            "  MODEL_PROVIDER           gemini | openai (lm_studio accepted as alias for openai)",
             "  MODEL_NAME               Model id for the selected provider",
-            "  OPEN_AI_URL              Base URL including /v1 (required for lm_studio;",
-            "                           optional for openai, defaults to api.openai.com)",
-            "  OPENAI_API_KEY           Required for openai; optional for lm_studio (placeholder ok)",
+            "  OPEN_AI_URL              Optional for OpenAI cloud (defaults to api.openai.com);",
+            "                           set for local OpenAI-compatible servers (e.g. LM Studio), /v1 suffix",
+            "  OPENAI_API_KEY           Required for OpenAI cloud; optional placeholder ok for local URL",
             "  GEMINI_API_KEY           Required when MODEL_PROVIDER=gemini",
         ]
     )

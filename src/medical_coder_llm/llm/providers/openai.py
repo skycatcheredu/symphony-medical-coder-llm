@@ -96,9 +96,9 @@ def _message_content_to_text(content: Any) -> str:
 
 
 class LmStudioClient:
-    """OpenAI-compatible `/v1/chat/completions` (e.g. LM Studio local server)."""
+    """OpenAI-compatible servers using `POST .../chat/completions` (e.g. LM Studio, vLLM)."""
 
-    provider: LlmProvider = "lm_studio"
+    provider: LlmProvider = "openai"
 
     def __init__(
         self,
