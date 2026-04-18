@@ -3,8 +3,6 @@
 
   const noteEl = $("note");
   const ontologyEl = $("ontology");
-  const providerEl = $("provider");
-  const modelEl = $("model");
   const runBtn = $("run");
   const loadingEl = $("loading");
   const errorEl = $("error");
@@ -115,8 +113,6 @@
     const body = {
       note: noteEl.value,
       ontology: ontologyEl.value.trim() || "data/ontology/codes.csv",
-      provider: providerEl.value || null,
-      model: modelEl.value.trim() || null,
     };
 
     setLoading(true);

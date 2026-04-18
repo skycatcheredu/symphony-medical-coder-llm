@@ -31,14 +31,12 @@ if STATIC_DIR.is_dir():
 class CodeRequest(BaseModel):
     note: str = Field(..., description="Clinical note text")
     ontology: str = "data/ontology/codes.csv"
-    provider: str | None = None
-    model: str | None = None
 
-    @field_validator("provider", "model", mode="before")
+    @field_validator("ontology", mode="before")
     @classmethod
-    def empty_str_to_none(cls, v: object) -> object:
+    def empty_str_to_default(cls, v: object) -> object:
         if v == "":
-            return None
+            return "data/ontology/codes.csv"
         return v
 
 
@@ -56,8 +54,6 @@ async def api_code(body: CodeRequest) -> dict[str, object]:
         return run_coding_to_json(
             body.note,
             ontology_path=body.ontology,
-            provider=body.provider,
-            model=body.model,
         )
 
     try:

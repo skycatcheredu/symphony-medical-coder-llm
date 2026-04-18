@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -10,37 +10,49 @@
     <header class="header">
       <h1>Medical Coder</h1>
       <p class="lede">
-        Paste a clinical note below, then click <strong>Generate codes</strong>. The tool suggests
-        diagnosis and procedure codes using this project’s ontology and your configured AI provider
-        (see <code>.env</code> for API keys).
+        Paste a clinical note below, then click <strong>Generate codes</strong>.
+        The tool suggests diagnosis and procedure codes using this project’s
+        ontology and your configured AI provider (set
+        <code>MODEL_PROVIDER</code> and related variables in <code>.env</code>;
+        see <code>.env.example</code>).
       </p>
     </header>
 
     <main class="main">
       <label class="label" for="note">Clinical note</label>
-      <textarea id="note" class="textarea" rows="14" placeholder="Paste the patient note here…"></textarea>
+      <textarea
+        id="note"
+        class="textarea"
+        rows="14"
+        placeholder="Paste the patient note here…"
+      ></textarea>
 
       <details class="advanced" id="advanced">
         <summary>Advanced options</summary>
         <div class="advanced-grid">
           <label class="label" for="ontology">Ontology CSV path</label>
-          <input id="ontology" class="input" type="text" value="data/ontology/codes.csv" />
+          <input
+            id="ontology"
+            class="input"
+            type="text"
+            value="data/ontology/codes.csv"
+          />
 
-          <label class="label" for="provider">Provider (optional)</label>
-          <select id="provider" class="input">
-            <option value="">Default from project config</option>
-            <option value="openai">openai</option>
-            <option value="gemini">gemini</option>
-          </select>
-
-          <label class="label" for="model">Model override (optional)</label>
-          <input id="model" class="input" type="text" placeholder="Leave blank for default model" />
+          <p class="advanced-hint">
+            LLM provider and model are configured on the server via
+            <code>.env</code> (not in the browser). Restart the web app after
+            changing environment variables.
+          </p>
         </div>
       </details>
 
       <div class="actions">
-        <button type="button" id="run" class="btn btn-primary">Generate codes</button>
-        <span id="loading" class="loading hidden" aria-live="polite">Working… this may take a minute.</span>
+        <button type="button" id="run" class="btn btn-primary">
+          Generate codes
+        </button>
+        <span id="loading" class="loading hidden" aria-live="polite"
+          >Working… this may take a minute.</span
+        >
       </div>
 
       <div id="error" class="error hidden" role="alert"></div>
@@ -90,15 +102,25 @@
         <div class="card">
           <h3>Pipeline thought process</h3>
           <p class="thought-lede">
-            Each step shows the structured output that fed the next stage (including parsed LLM JSON where
-            applicable).
+            Each step shows the structured output that fed the next stage
+            (including parsed LLM JSON where applicable).
           </p>
-          <div id="thought-process" class="thought-process" aria-live="polite"></div>
+          <div
+            id="thought-process"
+            class="thought-process"
+            aria-live="polite"
+          ></div>
         </div>
 
         <div class="row-actions">
           <button type="button" id="copy-json" class="btn">Copy JSON</button>
-          <a id="download-json" class="btn btn-link" href="#" download="coding-output.json">Download JSON</a>
+          <a
+            id="download-json"
+            class="btn btn-link"
+            href="#"
+            download="coding-output.json"
+            >Download JSON</a
+          >
         </div>
 
         <details class="trace">
@@ -109,7 +131,11 @@
     </main>
 
     <footer class="footer">
-      <p>Run the app from a terminal with <code>uv run medical-coder-llm-web</code>, then open the printed URL in your browser.</p>
+      <p>
+        Run the app from a terminal with
+        <code>uv run medical-coder-llm-web</code>, then open the printed URL in
+        your browser.
+      </p>
     </footer>
 
     <script src="/static/app.js"></script>

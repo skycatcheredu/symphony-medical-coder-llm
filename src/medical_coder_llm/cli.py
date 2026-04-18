@@ -7,7 +7,6 @@ from typing import Sequence
 
 from dotenv import load_dotenv
 
-from medical_coder_llm.config.models import LlmProvider
 from medical_coder_llm.run_code import run_coding_to_json
 
 
@@ -22,14 +21,16 @@ def _print_help() -> None:
             "Options:",
             "  -i, --input <path>       Input patient note file (default: input.txt)",
             "  -o, --output <path>      Write output JSON to a file (default: stdout)",
-            "  --provider <name>        LLM provider: openai | gemini",
-            "  --model <name>           Model override",
             "  --ontology <path>        Ontology CSV path (default: data/ontology/codes.csv)",
             "  -h, --help               Show this help message",
             "",
-            "Environment variables:",
-            "  OPENAI_API_KEY           Required when provider=openai",
-            "  GEMINI_API_KEY           Required when provider=gemini",
+            "Environment variables (configure LLM in `.env`; see `.env.example`):",
+            "  MODEL_PROVIDER           gemini | openai | lm_studio",
+            "  MODEL_NAME               Model id for the selected provider",
+            "  OPEN_AI_URL              Base URL including /v1 (required for lm_studio;",
+            "                           optional for openai, defaults to api.openai.com)",
+            "  OPENAI_API_KEY           Required for openai; optional for lm_studio (placeholder ok)",
+            "  GEMINI_API_KEY           Required when MODEL_PROVIDER=gemini",
         ]
     )
     print(text)
@@ -40,8 +41,6 @@ def _parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument("positional_input", nargs="?", default=None)
     parser.add_argument("-i", "--input", dest="input_opt", default=None)
     parser.add_argument("-o", "--output", dest="output_path", default=None)
-    parser.add_argument("--provider", default=None)
-    parser.add_argument("--model", default=None)
     parser.add_argument("--ontology", default="data/ontology/codes.csv")
     parser.add_argument("-h", "--help", action="store_true")
     return parser.parse_args(list(argv))
@@ -59,13 +58,6 @@ def main(argv: Sequence[str] | None = None) -> None:
         input_path = args.input_opt or args.positional_input or "input.txt"
         ontology_path = args.ontology
 
-        provider: LlmProvider | None = None
-        if args.provider is not None:
-            if args.provider not in ("openai", "gemini"):
-                print("Error: Unsupported provider. Use openai or gemini.", file=sys.stderr)
-                raise SystemExit(1)
-            provider = args.provider  # type: ignore[assignment]
-
         path = Path(input_path)
         if not path.is_file():
             print(f"Error: Input file not found: {input_path}", file=sys.stderr)
@@ -76,8 +68,6 @@ def main(argv: Sequence[str] | None = None) -> None:
             output_json = run_coding_to_json(
                 note_text,
                 ontology_path=ontology_path,
-                provider=provider,
-                model=args.model,
             )
         except ValueError as e:
             print(f"Error: {e}", file=sys.stderr)

@@ -75,6 +75,13 @@ body {
   margin-top: 0.75rem;
 }
 
+.advanced-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: #444;
+  grid-column: 1 / -1;
+}
+
 .actions {
   display: flex;
   align-items: center;
