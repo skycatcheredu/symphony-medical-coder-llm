@@ -11,5 +11,7 @@ __pycache__
 .ruff_cache
 .mypy_cache
 .DS_Store
+.cache/
 build/
 dist/
+data/ontology/codes.csv
