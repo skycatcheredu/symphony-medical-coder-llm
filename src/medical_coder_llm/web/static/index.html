@@ -87,13 +87,22 @@
           </div>
         </div>
 
+        <div class="card">
+          <h3>Pipeline thought process</h3>
+          <p class="thought-lede">
+            Each step shows the structured output that fed the next stage (including parsed LLM JSON where
+            applicable).
+          </p>
+          <div id="thought-process" class="thought-process" aria-live="polite"></div>
+        </div>
+
         <div class="row-actions">
           <button type="button" id="copy-json" class="btn">Copy JSON</button>
           <a id="download-json" class="btn btn-link" href="#" download="coding-output.json">Download JSON</a>
         </div>
 
         <details class="trace">
-          <summary>Technical details (pipeline stages)</summary>
+          <summary>Raw stage trace JSON</summary>
           <pre id="trace" class="trace-pre"></pre>
         </details>
       </section>

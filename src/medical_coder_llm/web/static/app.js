@@ -13,6 +13,7 @@
   const dxBody = $("dx-table").querySelector("tbody");
   const pxBody = $("px-table").querySelector("tbody");
   const traceEl = $("trace");
+  const thoughtEl = $("thought-process");
   const copyBtn = $("copy-json");
   const downloadEl = $("download-json");
 
@@ -52,6 +53,42 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  const STAGE_TITLES = {
+    evidence_extraction: "Evidence extraction",
+    index_navigation: "Index navigation",
+    tabular_validation: "Tabular validation",
+    code_reconciliation: "Code reconciliation",
+  };
+
+  function stageTitle(stage) {
+    return STAGE_TITLES[stage] || stage;
+  }
+
+  function fillThoughtProcess(container, trace) {
+    container.textContent = "";
+    if (!trace || trace.length === 0) {
+      const p = document.createElement("p");
+      p.className = "thought-lede";
+      p.textContent = "No pipeline trace returned.";
+      container.appendChild(p);
+      return;
+    }
+    for (const entry of trace) {
+      const details = document.createElement("details");
+      details.className = "thought-stage";
+      const summary = document.createElement("summary");
+      const title = escapeHtml(stageTitle(entry.stage));
+      const sumLine = escapeHtml(entry.summary != null ? String(entry.summary) : "");
+      summary.innerHTML = `<strong>${title}</strong> — ${sumLine}`;
+      const pre = document.createElement("pre");
+      pre.className = "thought-pre";
+      pre.textContent = JSON.stringify(entry.stageOutput != null ? entry.stageOutput : {}, null, 2);
+      details.appendChild(summary);
+      details.appendChild(pre);
+      container.appendChild(details);
+    }
   }
 
   function fillTable(tbody, rows) {
@@ -99,6 +136,7 @@
       summaryEl.textContent = data.patientSummary ?? "";
       fillTable(dxBody, data.diagnosisCodes);
       fillTable(pxBody, data.procedureCodes);
+      fillThoughtProcess(thoughtEl, data.stageTrace);
       traceEl.textContent = JSON.stringify(data.stageTrace ?? [], null, 2);
       resultsEl.classList.remove("hidden");
     } catch (e) {

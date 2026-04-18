@@ -55,7 +55,9 @@ def _build_fallback_candidates(note_text: str) -> list[dict[str, Any]]:
     return result
 
 
-def run_evidence_extraction(llm: LlmClient, note_text: str) -> EvidenceExtractionResult:
+def run_evidence_extraction(
+    llm: LlmClient, note_text: str
+) -> tuple[EvidenceExtractionResult, dict[str, Any] | None]:
     response: dict[str, Any] | None = None
     try:
         response = llm.generate_json(
@@ -118,4 +120,6 @@ def run_evidence_extraction(llm: LlmClient, note_text: str) -> EvidenceExtractio
     if not patient_summary:
         patient_summary = _build_fallback_summary(note_text)
 
-    return EvidenceExtractionResult(patient_summary=patient_summary, candidates=candidates)
+    result = EvidenceExtractionResult(patient_summary=patient_summary, candidates=candidates)
+    llm_json: dict[str, Any] | None = response if isinstance(response, dict) else None
+    return result, llm_json

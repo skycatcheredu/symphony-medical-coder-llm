@@ -2,28 +2,16 @@ from __future__ import annotations
 
 import json
 
+from medical_coder_llm.output.stage_payloads import evidence_span_to_json, final_code_to_json
 from medical_coder_llm.types import CodingResult, EvidenceSpan, FinalCode, StageTrace
 
 
 def _evidence_span(span: EvidenceSpan) -> dict[str, object]:
-    return {
-        "text": span.text,
-        "startChar": span.start_char,
-        "endChar": span.end_char,
-        "reason": span.reason,
-    }
+    return evidence_span_to_json(span)
 
 
 def _final_code(code: FinalCode) -> dict[str, object]:
-    return {
-        "code": code.code,
-        "description": code.description,
-        "codingSystem": code.coding_system,
-        "category": code.category,
-        "confidence": code.confidence,
-        "rationale": code.rationale,
-        "evidenceSpans": [_evidence_span(s) for s in code.evidence_spans],
-    }
+    return final_code_to_json(code)
 
 
 def _stage_trace(stage: StageTrace) -> dict[str, object]:
@@ -33,6 +21,7 @@ def _stage_trace(stage: StageTrace) -> dict[str, object]:
         "metadata": stage.metadata,
         "startedAt": stage.started_at,
         "finishedAt": stage.finished_at,
+        "stageOutput": stage.output,
     }
 
 

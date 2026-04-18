@@ -7,6 +7,12 @@ from medical_coder_llm.pipeline.stages.code_reconciliation import run_code_recon
 from medical_coder_llm.pipeline.stages.evidence_extraction import run_evidence_extraction
 from medical_coder_llm.pipeline.stages.index_navigation import run_index_navigation
 from medical_coder_llm.pipeline.stages.tabular_validation import run_tabular_validation
+from medical_coder_llm.output.stage_payloads import (
+    code_reconciliation_output,
+    evidence_extraction_output,
+    index_navigation_output,
+    tabular_validation_output,
+)
 from medical_coder_llm.types import CodingResult, OntologyEntry, StageTrace
 
 
@@ -24,7 +30,7 @@ def run_coding_pipeline(
     trace: list[StageTrace] = []
 
     evidence_start = datetime.now(timezone.utc)
-    evidence = run_evidence_extraction(llm, note_text)
+    evidence, evidence_llm = run_evidence_extraction(llm, note_text)
     trace.append(
         StageTrace(
             stage="evidence_extraction",
@@ -32,6 +38,11 @@ def run_coding_pipeline(
             metadata={"candidateCount": len(evidence.candidates)},
             started_at=_iso_utc(evidence_start),
             finished_at=_iso_utc(),
+            output=evidence_extraction_output(
+                patient_summary=evidence.patient_summary,
+                candidates=evidence.candidates,
+                llm_json=evidence_llm,
+            ),
         )
     )
 
@@ -46,11 +57,12 @@ def run_coding_pipeline(
             },
             started_at=_iso_utc(index_start),
             finished_at=_iso_utc(),
+            output=index_navigation_output(indexed=indexed),
         )
     )
 
     tabular_start = datetime.now(timezone.utc)
-    selections = run_tabular_validation(llm, note_text, indexed)
+    selections, tabular_llm = run_tabular_validation(llm, note_text, indexed)
     trace.append(
         StageTrace(
             stage="tabular_validation",
@@ -60,6 +72,7 @@ def run_coding_pipeline(
             },
             started_at=_iso_utc(tabular_start),
             finished_at=_iso_utc(),
+            output=tabular_validation_output(selections=selections, llm_json=tabular_llm),
         )
     )
 
@@ -75,6 +88,7 @@ def run_coding_pipeline(
             },
             started_at=_iso_utc(reconcile_start),
             finished_at=_iso_utc(),
+            output=code_reconciliation_output(final_codes=final_codes),
         )
     )
 

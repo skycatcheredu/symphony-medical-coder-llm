@@ -24,6 +24,7 @@ src/medical_coder_llm/ontology/loader.py
 src/medical_coder_llm/ontology/search.py
 src/medical_coder_llm/output/__init__.py
 src/medical_coder_llm/output/format.py
+src/medical_coder_llm/output/stage_payloads.py
 src/medical_coder_llm/pipeline/__init__.py
 src/medical_coder_llm/pipeline/orchestrator.py
 src/medical_coder_llm/pipeline/stages/__init__.py

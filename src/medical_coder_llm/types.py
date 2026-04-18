@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal
 
 CodingSystem = Literal["ICD-10-CM", "ICD-10-PCS", "CPT"]
@@ -80,6 +80,7 @@ class StageTrace:
     metadata: dict[str, Any]
     started_at: str
     finished_at: str
+    output: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

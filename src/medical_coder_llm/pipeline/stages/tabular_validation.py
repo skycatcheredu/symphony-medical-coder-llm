@@ -30,9 +30,9 @@ def run_tabular_validation(
     llm: LlmClient,
     note_text: str,
     indexed: list[IndexedCandidate],
-) -> list[CandidateSelection]:
+) -> tuple[list[CandidateSelection], dict[str, Any] | None]:
     if not indexed:
-        return []
+        return [], None
 
     response: dict[str, Any] | None = None
     try:
@@ -91,4 +91,5 @@ def run_tabular_validation(
             confidence=0.35,
         )
 
-    return [v for v in by_candidate.values() if v.candidate_id]
+    llm_json: dict[str, Any] | None = response if isinstance(response, dict) else None
+    return [v for v in by_candidate.values() if v.candidate_id], llm_json
