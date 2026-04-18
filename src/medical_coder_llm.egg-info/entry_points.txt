@@ -1,2 +1,3 @@
 [console_scripts]
 medical-coder-llm = medical_coder_llm.cli:main
+medical-coder-llm-web = medical_coder_llm.web.main:main

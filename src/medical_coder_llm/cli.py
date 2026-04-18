@@ -5,14 +5,10 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-import httpx
 from dotenv import load_dotenv
 
-from medical_coder_llm.config.models import LlmProvider, resolve_model_config
-from medical_coder_llm.llm.client import build_llm_client
-from medical_coder_llm.ontology.loader import load_ontology_entries
-from medical_coder_llm.output.format import format_result_as_json
-from medical_coder_llm.pipeline.orchestrator import run_coding_pipeline
+from medical_coder_llm.config.models import LlmProvider
+from medical_coder_llm.run_code import run_coding_to_json
 
 
 def _print_help() -> None:
@@ -70,32 +66,22 @@ def main(argv: Sequence[str] | None = None) -> None:
                 raise SystemExit(1)
             provider = args.provider  # type: ignore[assignment]
 
-        model_config = resolve_model_config(provider=provider, model=args.model)
-
         path = Path(input_path)
         if not path.is_file():
             print(f"Error: Input file not found: {input_path}", file=sys.stderr)
             raise SystemExit(1)
-        note_text = path.read_text(encoding="utf-8").strip()
-        if not note_text:
-            print(f"Error: Input file is empty: {input_path}", file=sys.stderr)
-            raise SystemExit(1)
+        note_text = path.read_text(encoding="utf-8")
 
         try:
-            ontology_entries = load_ontology_entries(ontology_path)
-        except (OSError, ValueError) as e:
-            print(f"Error: {e}", file=sys.stderr)
-            raise SystemExit(1)
-
-        with httpx.Client(timeout=120.0) as http:
-            llm = build_llm_client(model_config, http)
-            result = run_coding_pipeline(
-                note_text=note_text,
-                llm=llm,
-                ontology_entries=ontology_entries,
+            output_json = run_coding_to_json(
+                note_text,
+                ontology_path=ontology_path,
+                provider=provider,
+                model=args.model,
             )
-
-        output_json = format_result_as_json(result)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            raise SystemExit(1) from e
         if args.output_path:
             out = Path(args.output_path)
             out.write_text(output_json + "\n", encoding="utf-8")

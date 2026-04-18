@@ -3,6 +3,7 @@ pyproject.toml
 src/medical_coder_llm/__init__.py
 src/medical_coder_llm/__main__.py
 src/medical_coder_llm/cli.py
+src/medical_coder_llm/run_code.py
 src/medical_coder_llm/types.py
 src/medical_coder_llm.egg-info/PKG-INFO
 src/medical_coder_llm.egg-info/SOURCES.txt
@@ -30,3 +31,9 @@ src/medical_coder_llm/pipeline/stages/code_reconciliation.py
 src/medical_coder_llm/pipeline/stages/evidence_extraction.py
 src/medical_coder_llm/pipeline/stages/index_navigation.py
 src/medical_coder_llm/pipeline/stages/tabular_validation.py
+src/medical_coder_llm/web/__init__.py
+src/medical_coder_llm/web/app.py
+src/medical_coder_llm/web/main.py
+src/medical_coder_llm/web/static/app.js
+src/medical_coder_llm/web/static/index.html
+src/medical_coder_llm/web/static/styles.css
