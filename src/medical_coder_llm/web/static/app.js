@@ -1,4 +1,4 @@
-(function () {
+(async function () {
   const $ = (id) => document.getElementById(id);
 
   const noteEl = $("note");
@@ -15,7 +15,62 @@
   const copyBtn = $("copy-json");
   const downloadEl = $("download-json");
 
+  const ledeDefault = $("lede-default");
+  const ledeSetup = $("lede-setup");
+  const setupPanel = $("setup-panel");
+  const setupLedeNew = $("setup-lede-new");
+  const setupLedeOverride = $("setup-lede-override");
+  const setupProvider = $("setup-provider");
+  const setupModel = $("setup-model");
+  const setupOpenaiUrlRow = $("setup-openai-url-row");
+  const setupOpenaiUrl = $("setup-openai-url");
+  const setupApiKeyLabel = $("setup-api-key-label");
+  const setupApiKey = $("setup-api-key");
+  const setupApiKeyHint = $("setup-api-key-hint");
+  const setupSave = $("setup-save");
+  const setupCancel = $("setup-cancel");
+  const setupTools = $("setup-tools");
+  const btnChangeLlm = $("btn-change-llm");
+  const btnClearDotenv = $("btn-clear-dotenv");
+
   let lastPayload = null;
+  /** True until `/api/setup-status` reports no mandatory setup (pessimistic until then). */
+  let mustConfigure = true;
+  /** True while “Change LLM settings” panel is open (optional cancel). */
+  let setupOpenForOverride = false;
+
+  function runShouldBeEnabled() {
+    return !mustConfigure && !setupOpenForOverride;
+  }
+
+  function syncRunButton() {
+    const loading = !loadingEl.classList.contains("hidden");
+    runBtn.disabled = loading || !runShouldBeEnabled();
+  }
+
+  function formatErrorDetail(data) {
+    const d = data.detail;
+    if (d == null) return null;
+    if (typeof d === "string") return d;
+    if (Array.isArray(d)) {
+      return d
+        .map((item) => {
+          if (item && typeof item === "object" && "msg" in item) return String(item.msg);
+          try {
+            return JSON.stringify(item);
+          } catch {
+            return String(item);
+          }
+        })
+        .join(" ");
+    }
+    if (typeof d === "object" && d.msg) return String(d.msg);
+    try {
+      return JSON.stringify(d);
+    } catch {
+      return String(d);
+    }
+  }
 
   function setError(msg) {
     if (!msg) {
@@ -29,8 +84,168 @@
 
   function setLoading(on) {
     loadingEl.classList.toggle("hidden", !on);
-    runBtn.disabled = on;
+    syncRunButton();
   }
+
+  function setSetupLedeOverrideMode(on) {
+    setupLedeNew.classList.toggle("hidden", on);
+    setupLedeOverride.classList.toggle("hidden", !on);
+  }
+
+  function showMandatorySetupUi() {
+    mustConfigure = true;
+    setupOpenForOverride = false;
+    setSetupLedeOverrideMode(false);
+    setupPanel.classList.remove("hidden");
+    setupCancel.classList.add("hidden");
+    ledeDefault.classList.add("hidden");
+    ledeSetup.classList.remove("hidden");
+    setupTools.classList.add("hidden");
+    syncRunButton();
+  }
+
+  function hideSetupUi() {
+    setupPanel.classList.add("hidden");
+    setupCancel.classList.add("hidden");
+    setSetupLedeOverrideMode(false);
+    ledeDefault.classList.remove("hidden");
+    ledeSetup.classList.add("hidden");
+  }
+
+  function openOverrideSetup() {
+    setError("");
+    mustConfigure = false;
+    setupOpenForOverride = true;
+    setSetupLedeOverrideMode(true);
+    setupPanel.classList.remove("hidden");
+    setupCancel.classList.remove("hidden");
+    ledeDefault.classList.remove("hidden");
+    ledeSetup.classList.add("hidden");
+    syncRunButton();
+  }
+
+  function cancelOverrideSetup() {
+    setupOpenForOverride = false;
+    hideSetupUi();
+    syncRunButton();
+  }
+
+  function syncProviderUi() {
+    const isOpenai = setupProvider.value === "openai";
+    setupOpenaiUrlRow.classList.toggle("hidden", !isOpenai);
+    setupApiKeyLabel.textContent = isOpenai ? "OpenAI API key" : "Gemini API key";
+    setupApiKeyHint.textContent = isOpenai
+      ? "Required for OpenAI cloud. Optional for many local servers (any value is often accepted)."
+      : "Required. Create a key in Google AI Studio.";
+  }
+
+  async function initSetup() {
+    try {
+      const res = await fetch("/api/setup-status");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        mustConfigure = false;
+        return;
+      }
+      if (data.needsSetup) {
+        mustConfigure = true;
+        showMandatorySetupUi();
+        syncProviderUi();
+        return;
+      }
+      mustConfigure = false;
+      setupTools.classList.toggle("hidden", !data.dotenvPresent);
+    } catch {
+      mustConfigure = false;
+    }
+    syncRunButton();
+  }
+
+  setupProvider.addEventListener("change", syncProviderUi);
+
+  btnChangeLlm.addEventListener("click", () => {
+    openOverrideSetup();
+    syncProviderUi();
+  });
+
+  btnClearDotenv.addEventListener("click", async () => {
+    if (
+      !confirm(
+        "Remove the .env file from the server’s working directory and clear LLM settings from this process? You will need to configure again before generating codes.",
+      )
+    ) {
+      return;
+    }
+    setError("");
+    btnClearDotenv.disabled = true;
+    try {
+      const res = await fetch("/api/setup", { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(formatErrorDetail(data) || res.statusText || "Could not remove configuration");
+        return;
+      }
+      mustConfigure = true;
+      setupOpenForOverride = false;
+      setupTools.classList.add("hidden");
+      showMandatorySetupUi();
+      syncProviderUi();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      btnClearDotenv.disabled = false;
+    }
+  });
+
+  setupCancel.addEventListener("click", () => {
+    cancelOverrideSetup();
+  });
+
+  setupSave.addEventListener("click", async () => {
+    setError("");
+    const provider = setupProvider.value;
+    const model_name = setupModel.value.trim();
+    if (!model_name) {
+      setError("Model name is required.");
+      return;
+    }
+
+    const open_ai_url = setupOpenaiUrl.value.trim();
+    const key = setupApiKey.value;
+
+    const body = {
+      model_provider: provider,
+      model_name,
+      open_ai_url: provider === "openai" ? open_ai_url : "",
+      openai_api_key: provider === "openai" ? key : "",
+      gemini_api_key: provider === "gemini" ? key : "",
+      overwrite: setupOpenForOverride,
+    };
+
+    setupSave.disabled = true;
+    try {
+      const res = await fetch("/api/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = formatErrorDetail(data) || res.statusText || "Setup failed";
+        setError(detail);
+        return;
+      }
+      mustConfigure = false;
+      setupOpenForOverride = false;
+      hideSetupUi();
+      setupTools.classList.remove("hidden");
+      syncRunButton();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Network error");
+    } finally {
+      setupSave.disabled = false;
+    }
+  });
 
   function rowForCode(c) {
     const tr = document.createElement("tr");
@@ -124,7 +339,7 @@
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const detail = data.detail != null ? String(data.detail) : res.statusText || "Request failed";
+        const detail = formatErrorDetail(data) || res.statusText || "Request failed";
         setError(detail);
         return;
       }
@@ -166,4 +381,7 @@
     downloadEl.href = URL.createObjectURL(blob);
     setTimeout(() => URL.revokeObjectURL(downloadEl.href), 30_000);
   });
+
+  syncRunButton();
+  await initSetup();
 })();

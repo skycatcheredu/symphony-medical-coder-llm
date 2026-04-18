@@ -9,16 +9,93 @@
   <body>
     <header class="header">
       <h1>Medical Coder</h1>
-      <p class="lede">
+      <p class="lede" id="lede-default">
         Paste a clinical note below, then click <strong>Generate codes</strong>.
         The tool suggests diagnosis and procedure codes using this project’s
         ontology and your configured AI provider (set
         <code>MODEL_PROVIDER</code> and related variables in <code>.env</code>;
         see <code>.env.example</code>).
       </p>
+      <p class="lede hidden" id="lede-setup">
+        No <code>.env</code> file was found in the folder the server was started
+        from. Complete <strong>LLM configuration</strong> below first, then
+        paste a note and click <strong>Generate codes</strong>. If you already
+        set variables only in your shell, create a <code>.env</code> file (for
+        example copy from <code>.env.example</code>) to skip this step.
+      </p>
     </header>
 
     <main class="main">
+      <section
+        id="setup-panel"
+        class="setup-panel hidden"
+        aria-labelledby="setup-heading"
+      >
+        <h2 id="setup-heading" class="setup-title">LLM configuration</h2>
+        <p class="setup-lede" id="setup-lede-new">
+          Values are saved to <code>.env</code> in the current working directory
+          and applied for this session. Keys are sent only to this local server,
+          not to a third party except your chosen AI provider when you run coding.
+        </p>
+        <p class="setup-lede hidden" id="setup-lede-override">
+          You are replacing the existing <code>.env</code> file. Submit the form
+          to overwrite it with the new values.
+        </p>
+        <div class="setup-grid">
+          <label class="label" for="setup-provider">Provider</label>
+          <select id="setup-provider" class="input">
+            <option value="gemini">Google Gemini</option>
+            <option value="openai">OpenAI or OpenAI-compatible</option>
+          </select>
+
+          <label class="label" for="setup-model">Model name</label>
+          <input
+            id="setup-model"
+            class="input"
+            type="text"
+            placeholder="e.g. gemini-2.5-flash or gpt-5.1-mini"
+            autocomplete="off"
+          />
+
+          <div id="setup-openai-url-row" class="setup-openai-url-row hidden">
+            <label class="label" for="setup-openai-url"
+              >Base URL (OpenAI-compatible)</label
+            >
+            <input
+              id="setup-openai-url"
+              class="input"
+              type="url"
+              placeholder="Leave empty for OpenAI cloud, or e.g. http://127.0.0.1:1234/v1"
+              autocomplete="off"
+            />
+          </div>
+
+          <label class="label" for="setup-api-key" id="setup-api-key-label"
+            >API key</label
+          >
+          <div>
+            <input
+              id="setup-api-key"
+              class="input"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <p class="setup-hint" id="setup-api-key-hint"></p>
+          </div>
+        </div>
+        <div class="setup-actions">
+          <button type="button" id="setup-save" class="btn btn-primary">
+            Save configuration
+          </button>
+          <button type="button" id="setup-cancel" class="btn hidden">
+            Cancel
+          </button>
+        </div>
+      </section>
+
+      <div id="error" class="error hidden" role="alert"></div>
+
       <label class="label" for="note">Clinical note</label>
       <textarea
         id="note"
@@ -39,10 +116,27 @@
           />
 
           <p class="advanced-hint">
-            LLM provider and model are configured on the server via
-            <code>.env</code> (not in the browser). Restart the web app after
-            changing environment variables.
+            LLM settings are stored in <code>.env</code> in the server’s working
+            directory. Use the buttons below to change or remove them from this
+            page (no restart). You can still edit <code>.env</code> by hand; restart
+            the server if you change it outside the app.
           </p>
+
+          <div id="setup-tools" class="setup-tools hidden">
+            <p class="label">LLM configuration file</p>
+            <div class="setup-tools-row">
+              <button type="button" id="btn-change-llm" class="btn">
+                Change LLM settings
+              </button>
+              <button type="button" id="btn-clear-dotenv" class="btn">
+                Remove <code>.env</code>
+              </button>
+            </div>
+            <p class="setup-tools-hint">
+              Removing <code>.env</code> clears saved keys from disk and from
+              this process; you will need to configure again before generating codes.
+            </p>
+          </div>
         </div>
       </details>
 
@@ -54,8 +148,6 @@
           >Working… this may take a minute.</span
         >
       </div>
-
-      <div id="error" class="error hidden" role="alert"></div>
 
       <section id="results" class="results hidden">
         <h2>Results</h2>

@@ -1,6 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 """Build two one-file executables (CLI + web). Run from repo root:
     uv sync --group dev && uv run pyinstaller medical-coder-llm-bundle.spec
+
+    GitHub releases use this spec twice on macOS: Apple Silicon (macos-latest)
+    and Intel x86_64 (macos-15-intel). EXE targets use native arch (target_arch None).
 """
 from __future__ import annotations
 
