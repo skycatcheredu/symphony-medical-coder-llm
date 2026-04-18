@@ -20,6 +20,7 @@ src/medical_coder_llm/llm/providers/__init__.py
 src/medical_coder_llm/llm/providers/gemini.py
 src/medical_coder_llm/llm/providers/openai.py
 src/medical_coder_llm/ontology/__init__.py
+src/medical_coder_llm/ontology/default_codes.csv
 src/medical_coder_llm/ontology/loader.py
 src/medical_coder_llm/ontology/search.py
 src/medical_coder_llm/output/__init__.py

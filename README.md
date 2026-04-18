@@ -1,6 +1,8 @@
 # medical-coder-llm (Python)
 
-A Python CLI medical coder with the same stage workflow as the TypeScript reference in `with-bun/`:
+This repository is a Python implementation of **Symphony for Medical Coding** — the agentic, explainable medical coding approach described in [*Symphony for Medical Coding: A Next-Generation Agentic System for Scalable and Explainable Medical Coding*](https://arxiv.org/abs/2603.29709) (Edin et al., arXiv:2603.29709). [PDF](https://arxiv.org/pdf/2603.29709)
+
+Symphony reasons over clinical narratives with access to the coding ontology (rather than predicting from a fixed label set), so predictions can adapt to different coding systems and are grounded in span-level evidence. This project mirrors that idea with a staged LLM workflow (aligned with the TypeScript reference in `with-bun/`):
 
 1. Evidence extraction
 2. Index navigation
@@ -16,6 +18,19 @@ uv sync
 # or: pip install -e .
 ```
 
+## Standalone executables (PyInstaller)
+
+Build two one-file binaries locally (CLI + web):
+
+```bash
+uv sync --group dev
+uv run pyinstaller medical-coder-llm-bundle.spec
+```
+
+Outputs land in `dist/` (`medical-coder-llm` and `medical-coder-llm-web`; on Windows, `.exe`). For the default ontology path **`data/ontology/codes.csv`**, if that file is missing from the current working directory the app uses a **bundled copy** shipped inside the package (so frozen binaries work without copying `data/`). Override with **`--ontology`** (CLI) or **`ontology`** in the API body. **`.env` / environment variables** still load from the environment like the normal install.
+
+Pushes to **`main`** run [`.github/workflows/release-binaries.yml`](.github/workflows/release-binaries.yml), which builds Linux, macOS, and Windows binaries and uploads them to a **prerelease** on GitHub Releases (tag `v<version>-main.<run id>`).
+
 ## API keys
 
 Set one of:
@@ -28,7 +43,7 @@ Set one of:
 ## Input and ontology
 
 - Default input: `input.txt`
-- Default ontology: `data/ontology/codes.csv`
+- Default ontology: `data/ontology/codes.csv` (if that path is missing, the built-in sample ontology in the package is used instead)
 
 CSV columns: `code`, `description`, `codingSystem`, `category`, `searchTerms`
 

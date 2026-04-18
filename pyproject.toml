@@ -24,3 +24,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "medical_coder_llm.web" = ["static/*"]
+"medical_coder_llm.ontology" = ["default_codes.csv"]
+
+[dependency-groups]
+dev = ["pyinstaller>=6.0"]

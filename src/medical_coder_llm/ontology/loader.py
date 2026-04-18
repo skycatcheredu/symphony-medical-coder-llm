@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from importlib import resources
 from pathlib import Path
 
 from medical_coder_llm.types import CodeCategory, CodingSystem, OntologyEntry
+
+DEFAULT_ONTOLOGY_RELATIVE = Path("data/ontology/codes.csv")
 
 REQUIRED_HEADERS = ("code", "description", "codingSystem", "category", "searchTerms")
 
@@ -46,12 +49,28 @@ def _assert_valid_system(value: str) -> CodingSystem:
     raise ValueError(f"Invalid coding system in ontology row: {value}")
 
 
+def _is_default_ontology_path(csv_path: str | Path) -> bool:
+    return Path(csv_path).as_posix() == DEFAULT_ONTOLOGY_RELATIVE.as_posix()
+
+
+def _read_bundled_default_ontology() -> str:
+    ref = resources.files("medical_coder_llm.ontology").joinpath("default_codes.csv")
+    return ref.read_text(encoding="utf-8")
+
+
 def load_ontology_entries(csv_path: str | Path) -> list[OntologyEntry]:
     path = Path(csv_path)
-    if not path.is_file():
+    if path.is_file():
+        raw = path.read_text(encoding="utf-8")
+    elif _is_default_ontology_path(csv_path):
+        try:
+            raw = _read_bundled_default_ontology()
+        except (OSError, TypeError, ValueError) as e:
+            raise FileNotFoundError(
+                f"Ontology CSV not found at: {csv_path} (bundled default missing or unreadable)",
+            ) from e
+    else:
         raise FileNotFoundError(f"Ontology CSV not found at: {csv_path}")
-
-    raw = path.read_text(encoding="utf-8")
     lines = [
         line.strip()
         for line in raw.splitlines()

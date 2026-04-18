@@ -27,6 +27,19 @@ uv sync
 # or: pip install -e .
 ```
 
+## Standalone executables (PyInstaller)
+
+Build two one-file binaries locally (CLI + web):
+
+```bash
+uv sync --group dev
+uv run pyinstaller medical-coder-llm-bundle.spec
+```
+
+Outputs land in `dist/` (`medical-coder-llm` and `medical-coder-llm-web`; on Windows, `.exe`). For the default ontology path **`data/ontology/codes.csv`**, if that file is missing from the current working directory the app uses a **bundled copy** shipped inside the package (so frozen binaries work without copying `data/`). Override with **`--ontology`** (CLI) or **`ontology`** in the API body. **`.env` / environment variables** still load from the environment like the normal install.
+
+Pushes to **`main`** run [`.github/workflows/release-binaries.yml`](.github/workflows/release-binaries.yml), which builds Linux, macOS, and Windows binaries and uploads them to a **prerelease** on GitHub Releases (tag `v<version>-main.<run id>`).
+
 ## API keys
 
 Set one of:
@@ -39,7 +52,7 @@ Set one of:
 ## Input and ontology
 
 - Default input: `input.txt`
-- Default ontology: `data/ontology/codes.csv`
+- Default ontology: `data/ontology/codes.csv` (if that path is missing, the built-in sample ontology in the package is used instead)
 
 CSV columns: `code`, `description`, `codingSystem`, `category`, `searchTerms`
 

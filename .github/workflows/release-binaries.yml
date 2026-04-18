@@ -1,0 +1,92 @@
+name: Release binaries
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --frozen --group dev
+
+      - name: Build with PyInstaller
+        run: uv run pyinstaller medical-coder-llm-bundle.spec
+
+      - name: Stage release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          os="${{ runner.os }}"
+          arch_raw="${{ runner.arch }}"
+          arch=$(echo "$arch_raw" | tr '[:upper:]' '[:lower:]')
+          case "$os" in
+            Linux) tag="linux-${arch}" ;;
+            macOS) tag="macos-${arch}" ;;
+            Windows) tag="windows-${arch}" ;;
+            *) echo "Unknown OS: $os" >&2; exit 1 ;;
+          esac
+          if [[ "$os" == "Windows" ]]; then
+            cp dist/medical-coder-llm.exe "release-assets/medical-coder-llm-${tag}.exe"
+            cp dist/medical-coder-llm-web.exe "release-assets/medical-coder-llm-web-${tag}.exe"
+          else
+            cp dist/medical-coder-llm "release-assets/medical-coder-llm-${tag}"
+            cp dist/medical-coder-llm-web "release-assets/medical-coder-llm-web-${tag}"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-${{ runner.os }}-${{ runner.arch }}
+          path: release-assets/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assert release tag matches pyproject version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python3 <<'PY'
+          import os
+          import tomllib
+
+          tag = os.environ["RELEASE_TAG"]
+          version = tomllib.load(open("pyproject.toml", "rb"))["project"]["version"]
+          normalized = tag[1:] if tag.startswith("v") else tag
+          if normalized != version:
+              raise SystemExit(
+                  f"Release tag {tag!r} does not match pyproject.toml project.version {version!r}"
+              )
+          PY
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-assets
+          pattern: release-assets-*
+          merge-multiple: true
+
+      - name: Verify assets
+        run: ls -la all-assets
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: "all-assets/**"
