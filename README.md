@@ -9,14 +9,36 @@ Symphony reasons over clinical narratives with access to the coding ontology (ra
 3. Tabular validation
 4. Code reconciliation
 
-Supports OpenAI and Gemini. Configure defaults in `src/medical_coder_llm/config/models.py`.
+Supports **OpenAI** (cloud or OpenAI-compatible local servers) and **Google Gemini**. Runtime settings come from environment variables; see [`.env.example`](.env.example). For how defaults and base URLs are resolved in code, see [`src/medical_coder_llm/config/models.py`](src/medical_coder_llm/config/models.py).
+
+**Requirements:** Python 3.11 or newer (`requires-python` in [`pyproject.toml`](pyproject.toml)).
 
 ## Install
 
 ```bash
 uv sync
 # or: pip install -e .
+cp .env.example .env
+# Edit `.env`: set MODEL_PROVIDER, MODEL_NAME, and the API key for your provider (see below).
 ```
+
+For PyInstaller builds, install dev dependencies as well: `uv sync --group dev` (see [Standalone executables](#standalone-executables-pyinstaller)).
+
+## Configuration (environment)
+
+The CLI and web server call `python-dotenv` on startup and load **`.env` from the current working directory** (along with any variables already set in your shell).
+
+Required for every run:
+
+- **`MODEL_PROVIDER`** — `gemini` or `openai` (`lm_studio` is accepted as a deprecated alias for `openai`).
+- **`MODEL_NAME`** — Model id for that provider (e.g. `gemini-2.5-flash`, `gpt-5.1-mini`, or the id your local server shows).
+
+Provider-specific:
+
+- **Gemini** (`MODEL_PROVIDER=gemini`): **`GEMINI_API_KEY`**
+- **OpenAI** (`MODEL_PROVIDER=openai`): **`OPENAI_API_KEY`** required when using the default cloud base; optional for many local OpenAI-compatible servers (see [`.env.example`](.env.example)). Optional **`OPEN_AI_URL`** — defaults to `https://api.openai.com/v1` if unset; for LM Studio, vLLM, etc., set to your server base URL including `/v1`.
+
+Commented examples for Gemini, OpenAI cloud, and local OpenAI-compatible setups are in [`.env.example`](.env.example).
 
 ## Standalone executables (PyInstaller)
 
@@ -31,15 +53,6 @@ Outputs land in `dist/` (`medical-coder-llm` and `medical-coder-llm-web`; on Win
 
 Pushes to **`main`** run [`.github/workflows/release-binaries.yml`](.github/workflows/release-binaries.yml), which builds Linux, macOS, and Windows binaries and uploads them to a **prerelease** on GitHub Releases (tag `v<version>-main.<run id>`).
 
-## API keys
-
-Set one of:
-
-- `OPENAI_API_KEY` (provider `openai`)
-- `GEMINI_API_KEY` (provider `gemini`)
-
-`python-dotenv` loads `.env` from the current working directory.
-
 ## Input and ontology
 
 - Default input: `input.txt`
@@ -49,6 +62,16 @@ CSV columns: `code`, `description`, `codingSystem`, `category`, `searchTerms`
 
 ## Run
 
+Configure the LLM in `.env` (see [Configuration](#configuration-environment)). Example for Gemini:
+
+```env
+MODEL_PROVIDER=gemini
+MODEL_NAME=gemini-2.5-flash
+GEMINI_API_KEY=your-key
+```
+
+Then:
+
 ```bash
 uv run medical-coder-llm
 python -m medical_coder_llm
@@ -56,7 +79,6 @@ python -m medical_coder_llm
 
 ```bash
 uv run medical-coder-llm --input data/input.sample.txt -o output.json
-uv run medical-coder-llm --provider gemini --model gemini-2.5-flash
 uv run medical-coder-llm --ontology data/ontology/codes.csv
 ```
 
@@ -72,7 +94,7 @@ The terminal prints a URL, typically `http://127.0.0.1:8765`. Open that address 
 
 Optional flags: `--host` and `--port` (defaults: `127.0.0.1` and `8765`).
 
-The same process also exposes `POST /api/code` with JSON body `{ "note": "...", "ontology": "...", "provider": null, "model": null }` for programmatic use.
+The same process exposes **`POST /api/code`** with JSON body `{ "note": "...", "ontology": "..." }`. Field **`ontology`** is optional and defaults to `data/ontology/codes.csv`. Provider and model always come from the environment (not the request body).
 
 ## Output
 
