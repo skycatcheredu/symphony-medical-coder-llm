@@ -1,6 +1,6 @@
 # medical-coder-llm (Python)
 
-This repository is a Python implementation of **Symphony for Medical Coding** — the agentic, explainable medical coding approach described in [*Symphony for Medical Coding: A Next-Generation Agentic System for Scalable and Explainable Medical Coding*](https://arxiv.org/abs/2603.29709) (Edin et al., arXiv:2603.29709). [PDF](https://arxiv.org/pdf/2603.29709)
+This repository is a Python implementation of **Symphony for Medical Coding** — the agentic, explainable medical coding approach described in [_Symphony for Medical Coding: A Next-Generation Agentic System for Scalable and Explainable Medical Coding_](https://arxiv.org/abs/2603.29709) (Edin et al., arXiv:2603.29709). [PDF](https://arxiv.org/pdf/2603.29709)
 
 Symphony reasons over clinical narratives with access to the coding ontology (rather than predicting from a fixed label set), so predictions can adapt to different coding systems and are grounded in span-level evidence. This project mirrors that idea with a staged LLM workflow (aligned with the TypeScript reference in `with-bun/`):
 
@@ -9,7 +9,7 @@ Symphony reasons over clinical narratives with access to the coding ontology (ra
 3. Tabular validation
 4. Code reconciliation
 
-Supports **OpenAI** (cloud or OpenAI-compatible local servers) and **Google Gemini**. Runtime settings come from environment variables; see [`.env.example`](.env.example). For how defaults and base URLs are resolved in code, see [`src/medical_coder_llm/config/models.py`](src/medical_coder_llm/config/models.py).
+Supports **OpenAI** (cloud or OpenAI-compatible servers like LM Studio) and **Google Gemini**. Runtime settings come from environment variables; see [`.env.example`](.env.example). For how defaults and base URLs are resolved in code, see [`src/medical_coder_llm/config/models.py`](src/medical_coder_llm/config/models.py).
 
 **Requirements:** Python 3.11 or newer (`requires-python` in [`pyproject.toml`](pyproject.toml)).
 
@@ -42,6 +42,51 @@ Commented examples for Gemini, OpenAI cloud, and local OpenAI-compatible setups 
 
 ## Standalone executables (PyInstaller)
 
+Prebuilt binaries are attached to **published** [GitHub Releases](https://github.com/fahidsarker/symphony-medical-coding/releases). When you publish a release, [`.github/workflows/release-binaries.yml`](.github/workflows/release-binaries.yml) builds Linux, macOS, and Windows assets and uploads them to that release. The workflow checks that the release tag matches `project.version` in [`pyproject.toml`](pyproject.toml) (with or without a leading `v` on the tag).
+
+### Download from GitHub Releases
+
+Open the [releases page](https://github.com/fahidsarker/symphony-medical-coding/releases) or the [latest release](https://github.com/fahidsarker/symphony-medical-coding/releases/latest). For each OS and CPU you get two files:
+
+- **CLI:** `medical-coder-llm-<os>-<arch>` (on Windows, `.exe`)
+- **Web:** `medical-coder-llm-web-<os>-<arch>` (on Windows, `.exe`)
+
+`<os>` is `linux`, `macos`, or `windows`. `<arch>` is `x64` or `arm64`: use `x64` for typical Intel/AMD 64-bit desktops and `arm64` for Apple Silicon Macs or ARM Linux.
+
+Put **`.env` in your current working directory** when you launch (same as [Configuration (environment)](#configuration-environment)); copy and edit from [`.env.example`](.env.example).
+
+**macOS**
+
+```bash
+chmod +x medical-coder-llm-macos-arm64 medical-coder-llm-web-macos-arm64
+./medical-coder-llm-macos-arm64
+```
+
+On Intel Macs, use the `macos-x64` filenames instead. Start the web server with `./medical-coder-llm-web-macos-<arch>` (in another terminal if you also need the CLI).
+
+If macOS blocks the downloaded binaries, you can clear the quarantine attribute: `xattr -dr com.apple.quarantine ./medical-coder-llm-macos-* ./medical-coder-llm-web-macos-*`
+
+**Linux**
+
+```bash
+chmod +x medical-coder-llm-linux-x64 medical-coder-llm-web-linux-x64
+./medical-coder-llm-linux-x64
+```
+
+On ARM Linux, use the `linux-arm64` filenames. Run `./medical-coder-llm-web-linux-<arch>` for the web UI.
+
+**Windows**
+
+From PowerShell (in the folder containing the downloaded `.exe` files):
+
+```powershell
+.\medical-coder-llm-windows-x64.exe
+```
+
+Use the `windows-arm64` filenames on ARM Windows if you downloaded those assets. Run `.\medical-coder-llm-web-windows-<arch>.exe` for the web UI.
+
+### Build locally
+
 Build two one-file binaries locally (CLI + web):
 
 ```bash
@@ -50,8 +95,6 @@ uv run pyinstaller medical-coder-llm-bundle.spec
 ```
 
 Outputs land in `dist/` (`medical-coder-llm` and `medical-coder-llm-web`; on Windows, `.exe`). For the default ontology path **`data/ontology/codes.csv`**, if that file is missing from the current working directory the app uses a **bundled copy** shipped inside the package (so frozen binaries work without copying `data/`). Override with **`--ontology`** (CLI) or **`ontology`** in the API body. **`.env` / environment variables** still load from the environment like the normal install.
-
-Pushes to **`main`** run [`.github/workflows/release-binaries.yml`](.github/workflows/release-binaries.yml), which builds Linux, macOS, and Windows binaries and uploads them to a **prerelease** on GitHub Releases (tag `v<version>-main.<run id>`).
 
 ## Input and ontology
 
