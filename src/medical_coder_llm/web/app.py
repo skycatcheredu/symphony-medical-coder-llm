@@ -76,7 +76,7 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Medical Coder LLM", version="0.2.1", lifespan=lifespan)
+app = FastAPI(title="Medical Coder LLM", version="0.2.2", lifespan=lifespan)
 
 if STATIC_DIR.is_dir():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

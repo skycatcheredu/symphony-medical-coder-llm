@@ -231,6 +231,10 @@ select.input {
 .summary {
   margin: 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: min(50vh, 28rem);
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 .table-wrap {

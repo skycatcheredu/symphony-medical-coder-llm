@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: medical-coder-llm
-Version: 0.2.1
+Version: 0.2.2
 Summary: Medical coding CLI pipeline (Python port of with-bun)
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown

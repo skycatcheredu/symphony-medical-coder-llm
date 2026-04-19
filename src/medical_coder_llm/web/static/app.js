@@ -101,6 +101,8 @@
     ledeDefault.classList.add("hidden");
     ledeSetup.classList.remove("hidden");
     setupTools.classList.add("hidden");
+    setupProvider.value = "openai";
+    syncProviderUi();
     syncRunButton();
   }
 
@@ -150,7 +152,6 @@
       if (data.needsSetup) {
         mustConfigure = true;
         showMandatorySetupUi();
-        syncProviderUi();
         return;
       }
       mustConfigure = false;
@@ -189,7 +190,6 @@
       setupOpenForOverride = false;
       setupTools.classList.add("hidden");
       showMandatorySetupUi();
-      syncProviderUi();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Network error");
     } finally {
