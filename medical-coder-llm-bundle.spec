@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-"""Build two one-file executables (CLI + web). Run from repo root:
+"""Build two one-file executables (CLI + GUI). Run from repo root:
     uv sync --group dev && uv run pyinstaller medical-coder-llm-bundle.spec
 
     GitHub releases use this spec twice on macOS: Apple Silicon (macos-latest)
@@ -87,7 +87,7 @@ exe_web = EXE(
     a_web.binaries,
     a_web.datas,
     [],
-    name="medical-coder-llm-web",
+    name="medical-coder-llm-gui",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

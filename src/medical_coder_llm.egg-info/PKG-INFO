@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: medical-coder-llm
-Version: 0.2.2
+Version: 0.2.3
 Summary: Medical coding CLI pipeline (Python port of with-bun)
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
@@ -60,7 +60,7 @@ Prebuilt binaries are attached to **published** [GitHub Releases](https://github
 Open the [releases page](https://github.com/fahidsarker/symphony-medical-coding/releases) or the [latest release](https://github.com/fahidsarker/symphony-medical-coding/releases/latest). For each OS and CPU you get two files:
 
 - **CLI:** `medical-coder-llm-<os>-<arch>` (on Windows, `.exe`)
-- **Web:** `medical-coder-llm-web-<os>-<arch>` (on Windows, `.exe`)
+- **GUI:** `medical-coder-llm-gui-<os>-<arch>` (on Windows, `.exe`)
 
 `<os>` is `linux`, `macos`, or `windows`. `<arch>` is `x64` or `arm64`: use `x64` for typical Intel/AMD 64-bit desktops and `arm64` for Apple Silicon Macs or ARM Linux.
 
@@ -69,22 +69,22 @@ Put **`.env` in your current working directory** when you launch (same as [Confi
 **macOS**
 
 ```bash
-chmod +x medical-coder-llm-macos-arm64 medical-coder-llm-web-macos-arm64
+chmod +x medical-coder-llm-macos-arm64 medical-coder-llm-gui-macos-arm64
 ./medical-coder-llm-macos-arm64
 ```
 
-On Intel Macs, use the `macos-x64` filenames instead. Start the web server with `./medical-coder-llm-web-macos-<arch>` (in another terminal if you also need the CLI).
+On Intel Macs, use the `macos-x64` filenames instead. Start the web server with `./medical-coder-llm-gui-macos-<arch>` (in another terminal if you also need the CLI).
 
-If macOS blocks the downloaded binaries, you can clear the quarantine attribute: `xattr -dr com.apple.quarantine ./medical-coder-llm-macos-* ./medical-coder-llm-web-macos-*`
+If macOS blocks the downloaded binaries, you can clear the quarantine attribute: `xattr -dr com.apple.quarantine ./medical-coder-llm-macos-* ./medical-coder-llm-gui-macos-*`
 
 **Linux**
 
 ```bash
-chmod +x medical-coder-llm-linux-x64 medical-coder-llm-web-linux-x64
+chmod +x medical-coder-llm-linux-x64 medical-coder-llm-gui-linux-x64
 ./medical-coder-llm-linux-x64
 ```
 
-On ARM Linux, use the `linux-arm64` filenames. Run `./medical-coder-llm-web-linux-<arch>` for the web UI.
+On ARM Linux, use the `linux-arm64` filenames. Run `./medical-coder-llm-gui-linux-<arch>` for the web UI.
 
 **Windows**
 
@@ -94,18 +94,18 @@ From PowerShell (in the folder containing the downloaded `.exe` files):
 .\medical-coder-llm-windows-x64.exe
 ```
 
-Use the `windows-arm64` filenames on ARM Windows if you downloaded those assets. Run `.\medical-coder-llm-web-windows-<arch>.exe` for the web UI.
+Use the `windows-arm64` filenames on ARM Windows if you downloaded those assets. Run `.\medical-coder-llm-gui-windows-<arch>.exe` for the web UI.
 
 ### Build locally
 
-Build two one-file binaries locally (CLI + web):
+Build two one-file binaries locally (CLI + GUI):
 
 ```bash
 uv sync --group dev
 uv run pyinstaller medical-coder-llm-bundle.spec
 ```
 
-Outputs land in `dist/` (`medical-coder-llm` and `medical-coder-llm-web`; on Windows, `.exe`). For the default ontology path **`data/ontology/codes.csv`**, if that file is missing from the current working directory the app uses a **bundled copy** shipped inside the package (so frozen binaries work without copying `data/`). Override with **`--ontology`** (CLI) or **`ontology`** in the API body. **`.env` / environment variables** still load from the environment like the normal install.
+Outputs land in `dist/` (`medical-coder-llm` and `medical-coder-llm-gui`; on Windows, `.exe`). For the default ontology path **`data/ontology/codes.csv`**, if that file is missing from the current working directory the app uses a **bundled copy** shipped inside the package (so frozen binaries work without copying `data/`). Override with **`--ontology`** (CLI) or **`ontology`** in the API body. **`.env` / environment variables** still load from the environment like the normal install.
 
 ## Input and ontology
 
@@ -141,7 +141,7 @@ uv run medical-coder-llm --ontology data/ontology/codes.csv
 Start the local server from the project directory (so paths like `data/ontology/codes.csv` resolve correctly):
 
 ```bash
-uv run medical-coder-llm-web
+uv run medical-coder-llm-gui
 ```
 
 The terminal prints a URL, typically `http://127.0.0.1:8765`. Open that address in your browser (Safari, Chrome, or Edge), paste a clinical note, and click **Generate codes**.

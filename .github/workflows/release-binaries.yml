@@ -43,10 +43,10 @@ jobs:
           esac
           if [[ "$os" == "Windows" ]]; then
             cp dist/medical-coder-llm.exe "release-assets/medical-coder-llm-${tag}.exe"
-            cp dist/medical-coder-llm-web.exe "release-assets/medical-coder-llm-web-${tag}.exe"
+            cp dist/medical-coder-llm-gui.exe "release-assets/medical-coder-llm-gui-${tag}.exe"
           else
             cp dist/medical-coder-llm "release-assets/medical-coder-llm-${tag}"
-            cp dist/medical-coder-llm-web "release-assets/medical-coder-llm-web-${tag}"
+            cp dist/medical-coder-llm-gui "release-assets/medical-coder-llm-gui-${tag}"
           fi
 
       - uses: actions/upload-artifact@v4
